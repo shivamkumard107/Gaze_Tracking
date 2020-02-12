@@ -13,7 +13,7 @@ class Pupil(object):
         self.threshold = threshold
         self.x = None
         self.y = None
-        self.dict = {0:{0:[290], 1:[290]}, 1:{0:[310], 1:[310]}}
+        self.dict = {0:{0:[0.5], 1:[0.5]}, 1:{0:[0.5], 1:[0.5]}}
 
         self.detect_iris(eye_frame, side)
 
@@ -45,7 +45,8 @@ class Pupil(object):
         self.iris_frame = self.image_processing(eye_frame, self.threshold)
 
         contours, _ = cv2.findContours(self.iris_frame, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)[-2:]
-        cv2.drawContours(eye_frame, contours, -1, (0,255,0), 3)        
+        # print(len(contours), contours)
+        cv2.drawContours(eye_frame, contours, -1, (0,255,0), 3)
         contours = sorted(contours, key=cv2.contourArea)
 
         cv2.imshow("Iris Contour", eye_frame)
@@ -61,3 +62,7 @@ class Pupil(object):
         except (IndexError, ZeroDivisionError):
             self.x = int(np.mean(self.dict[side][0]))
             self.y = int(np.mean(self.dict[side][1]))
+
+        cv2.line(eye_frame, (self.x - 5, self.y), (self.x + 5, self.y), (0, 255, 0))
+        cv2.line(eye_frame, (self.x, self.y - 5), (self.x, self.y + 5), (0, 255, 0))
+

@@ -76,6 +76,12 @@ class GazeTracking(object):
             y = self.eye_right.origin[1] + self.eye_right.pupil.y
             return (x, y)
 
+    def x_cords(self):
+        if self.pupils_located:
+            pupil_left = self.eye_left.pupil.x / (self.eye_left.center[0] * 2 - 10)
+            pupil_right = self.eye_right.pupil.x / (self.eye_right.center[0] * 2 - 10)
+            return (pupil_left, pupil_right)
+
     def horizontal_ratio(self):
         """Returns a number between 0.0 and 1.0 that indicates the
         horizontal direction of the gaze. The extreme right is 0.0,
@@ -84,7 +90,7 @@ class GazeTracking(object):
         if self.pupils_located:
             pupil_left = self.eye_left.pupil.x / (self.eye_left.center[0] * 2 - 10)
             pupil_right = self.eye_right.pupil.x / (self.eye_right.center[0] * 2 - 10)
-            return (pupil_left + pupil_right) / 2
+            return (pupil_left+pupil_right)/2
 
     def vertical_ratio(self):
         """Returns a number between 0.0 and 1.0 that indicates the
@@ -94,7 +100,17 @@ class GazeTracking(object):
         if self.pupils_located:
             pupil_left = self.eye_left.pupil.y / (self.eye_left.center[1] * 2 - 10)
             pupil_right = self.eye_right.pupil.y / (self.eye_right.center[1] * 2 - 10)
-            return (pupil_left + pupil_right) / 2
+            return (pupil_left+pupil_right)/2
+
+    def y_cords(self):
+        """Returns a number between 0.0 and 1.0 that indicates the
+        vertical direction of the gaze. The extreme top is 0.0,
+        the center is 0.5 and the extreme bottom is 1.0
+        """
+        if self.pupils_located:
+            pupil_left = self.eye_left.pupil.y / (self.eye_left.center[1] * 2 - 10)
+            pupil_right = self.eye_right.pupil.y / (self.eye_right.center[1] * 2 - 10)
+            return (pupil_left, pupil_right)
 
     def is_right(self):
         """Returns true if the user is looking to the right"""

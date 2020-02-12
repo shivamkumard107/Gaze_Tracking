@@ -10,14 +10,13 @@ class Eye(object):
     initiates the pupil detection.
     """
 
-    LEFT_EYE_POINTS = [36, 37, 38, 39, 40, 41]
-    RIGHT_EYE_POINTS = [42, 43, 44, 45, 46, 47]
-
     def __init__(self, original_frame, landmarks, side, calibration):
         self.frame = None
         self.origin = None
         self.center = None
         self.pupil = None
+        self.LEFT_EYE_POINTS = [36, 37, 38, 39, 40, 41]
+        self.RIGHT_EYE_POINTS = [42, 43, 44, 45, 46, 47]
 
         self._analyze(original_frame, landmarks, side, calibration)
 
@@ -34,7 +33,7 @@ class Eye(object):
         return (x, y)
 
     def _isolate(self, frame, landmarks, points):
-        """Isolate an eye, to have a frame without other part of the face.
+        """Isolate an eye, to have a frame without other part of the face.e
 
         Arguments:
             frame (numpy.ndarray): Frame containing the face
