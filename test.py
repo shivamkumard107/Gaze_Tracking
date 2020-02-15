@@ -1,11 +1,29 @@
 import cv2
 from gaze_tracking import GazeTracking
+import pyrebase
 #from gaze_tracking import loss
+
+config = {
+    "apiKey" : "AIzaSyB1OyBIvLggIAGWoCDjQK4PId9WJfXnREE",
+    "authDomain": "mcandlefocus.firebaseapp.com",
+    "databaseURL": "https://mcandlefocus.firebaseio.com",
+    "projectId": "mcandlefocus",
+    "storageBucket": "mcandlefocus.appspot.com",
+    "messagingSenderId": "140073311865",
+    "appId": "1:140073311865:web:12426f96cae1f3c88a7ea8",
+    "measurementId": "G-H6DWEDR9Z7"
+};
+
+firebase = pyrebase.initialize_app(config)
+
+storage = firebase.storage()
+
+storage.child("images/new.mp4").download("video.mp4")
 
 #losses = loss.losses()
 gaze = GazeTracking()
 
-webcam = cv2.VideoCapture(0)
+# webcam = cv2.VideoCapture(0)
 
 list_x = []
 list_y = []
@@ -17,10 +35,12 @@ def mean(l):
 	return int(sum/len(l))
 
 def helper():
-    while True:
+    cap = cv2.VideoCapture("video.mp4")
+    while(cap.isOpened()):
         # We get a new frame from the webcam
         i = 0
-        _, frame = webcam.read()
+        # _, frame = webcam.read()
+        ret, frame = cap.read()
 
         # We send this frame to GazeTracking to analyze it
         gaze.refresh(frame)
