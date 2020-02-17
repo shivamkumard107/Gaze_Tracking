@@ -78,52 +78,58 @@ def mean(l):
 		sum += i
 	return int(sum/len(l))
 
-def helper():
+def helper(frames = 10):
     cap = cv2.VideoCapture("video.mp4")
     j = 0
     while(cap.isOpened()):
         # We get a new frame from the webcam
         i = 0
         # _, frame = webcam.read()
-        ret, frame = cap.read()
+        if(j%frames == 0):
+        	ret, frame = cap.read()
 
-        frame = imutils.rotate(frame, 90)
+        	frame = imutils.rotate(frame, 90)
 
-        # We send this frame to GazeTracking to analyze it
-        gaze.refresh(frame)
+        	# We send this frame to GazeTracking to analyze it
+        	gaze.refresh(frame)
 
-        frame = gaze.annotated_frame()
-        text = ""
+        	frame = gaze.annotated_frame()
+        	text = ""
 
-        if gaze.is_blinking():
-            text = "Blinking"
-        elif gaze.is_right():
-            text = "Looking right"
-        elif gaze.is_left():
-            text = "Looking left"
-        elif gaze.is_center():
-            text = "Looking center"
+        	if gaze.is_blinking():
+            		text = "Blinking"
+        	elif gaze.is_right():
+            		text = "Looking right"
+        	elif gaze.is_left():
+            		text = "Looking left"
+        	elif gaze.is_center():
+            		text = "Looking center"
 
-        cv2.putText(frame, text, (90, 60), cv2.FONT_HERSHEY_DUPLEX, 1.6, (0, 255, 0), 2)
+        # cv2.putText(frame, text, (90, 60), cv2.FONT_HERSHEY_DUPLEX, 1.6, (0, 255, 0), 2)
 
-        try:
-            left_pupil = gaze.pupil_left_coords()
-            right_pupil = gaze.pupil_right_coords()
-            x_cords = gaze.x_cords()
-            y_cords = gaze.y_cords()
+        	try:
+            		left_pupil = gaze.pupil_left_coords()
+            		right_pupil = gaze.pupil_right_coords()
+            		x_cords = gaze.x_cords()
+            		y_cords = gaze.y_cords()
         
-            cv2.putText(frame, "Left pupil:  " + str(left_pupil), (90, 130), cv2.FONT_HERSHEY_DUPLEX, 0.9, (0, 255, 0), 1)
-            cv2.putText(frame, "Right pupil: " + str(right_pupil), (90, 165), cv2.FONT_HERSHEY_DUPLEX, 0.9, (0, 255, 0), 1)
+            # cv2.putText(frame, "Left pupil:  " + str(left_pupil), (90, 130), cv2.FONT_HERSHEY_DUPLEX, 0.9, (0, 255, 0), 1)
+            # cv2.putText(frame, "Right pupil: " + str(right_pupil), (90, 165), cv2.FONT_HERSHEY_DUPLEX, 0.9, (0, 255, 0), 1)
 
             #pupil_loss = tuple(losses.pupil_error(left_pupil), losses.pupil_error(right_pupil, 0))
         	#iris_loss = tuple(losses.iris_error(tuple(x_cords[0], y_cords[0])), losses.iris_error(tuple(x_cords[1], y_cords[1]), 0))
             #print(str(pupil_loss), "\t", str(iris_loss))
 
             
-            print(str(left_pupil), "\t", str(right_pupil), "\t" ,str(x_cords), "\t", str(y_cords))
+            		print(str(left_pupil), "\t", str(right_pupil), "\t" ,str(x_cords), "\t", str(y_cords))
 
-        except:
-            continue
+        	except:
+            		continue
+
+        	eye_ref_l.push({'x':int(left_pupil[0]), 'y':int(left_pupil[1])})
+        	eye_ref_r.push({'x':int(right_pupil[0]), 'y':int(right_pupil[1])})
+        	pupil_ref_l.push({'x':int(x_cords[0]), 'y':int(x_cords[1])})
+        	pupil_ref_r.push({'x':int(y_cords[0]), 'y':int(y_cords[1])})
 
         j += 1
 
@@ -141,17 +147,12 @@ def helper():
             pass
         """
 
-        if(j%10 == 0):
-            eye_ref_l.push({'x':int(left_pupil[0]), 'y':int(left_pupil[1])})
-            eye_ref_r.push({'x':int(right_pupil[0]), 'y':int(right_pupil[1])})
-            pupil_ref_l.push({'x':int(x_cords[0]), 'y':int(x_cords[1])})
-            pupil_ref_r.push({'x':int(y_cords[0]), 'y':int(y_cords[1])})
 
-        cv2.imshow("Demo", frame)
+        # cv2.imshow("Demo", frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
         
 
-helper()
+helper(10)
