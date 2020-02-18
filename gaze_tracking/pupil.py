@@ -49,7 +49,7 @@ class Pupil(object):
         cv2.drawContours(eye_frame, contours, -1, (0,255,0), 3)
         contours = sorted(contours, key=cv2.contourArea)
 
-        cv2.imshow("Iris Contour", eye_frame)
+        # cv2.imshow("Iris Contour", eye_frame)
 
        # print(contours)
 
