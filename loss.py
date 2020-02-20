@@ -2,27 +2,31 @@ import numpy as np
 
 class losses():
 	def __init__(self):
-		self.pupil_ideal_left = (230, 230)
-		self.pupil_ideal_right = (310, 230)
+		self.pupil_ideal_left = (310/750, 170/375)
+		self.pupil_ideal_right = (420/750, 170/375)
 		self.iris_ideal_left = (0.5, 0.5)
 		self.iris_ideal_right = (0.5, 0.5)
 
 	def mse(self, x, y):
-		return (x**2 - y**2)**(1/2)
+		return (x**2 + y**2)**(1/2)
 
 	def pupil_error(self, pupil_co, left = 1):
 		if left:
-			return mse(np.abs(pupil_co.x-self.pupil_ideal_left.x), 
-				np.abs(pupil_co.y-self.pupil_ideal_left.y))
+			return self.mse(np.abs(pupil_co[0]/750-self.pupil_ideal_left[0]), 
+				np.abs(pupil_co[1]/375-self.pupil_ideal_left[1]))
 
-		return mse(np.abs(pupil_co.x-self.pupil_ideal_right.x), 
-				np.abs(pupil_co.y-self.pupil_ideal_right.y))
+		return self.mse(np.abs(pupil_co[0]/750-self.pupil_ideal_right[0]), 
+				np.abs(pupil_co[1]/375-self.pupil_ideal_right[1]))
 
-
-	def iris_error(self, iris_co, left = 1):
+	def iris_error(self, iris_co, x = 1):
 		if left:
-			return mse(np.abs(iris_co.x-self.iris_ideal_left.x),
-				np.abs(iris_co.y-self.iris_ideal_left.y))
+			return self.mse(np.abs(iris_co[0]-self.iris_ideal_left[0]),
+				np.abs(iris_co[1]-self.iris_ideal_left[1]))
 
-		return mse(np.abs(iris_co.x-self.iris_ideal_right.x),
-				np.abs(iris_co.y-self.iris_ideal_right.y))
+		return self.mse(np.abs(iris_co[0]-self.iris_ideal_right[0]),
+				np.abs(iris_co[1]-self.iris_ideal_right[1]))
+
+	def net_loss(self, pupil_co, iris_co, A = 0.5, B = 0.5, left = 1):
+		L1 = self.pupil_error(pupil_co)
+		L2 = self.iris_error(iris_co)
+		return A*L1 + B*L2
