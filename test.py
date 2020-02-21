@@ -6,6 +6,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 from loss import losses
+import os
 
 loss = losses()
 
@@ -60,13 +61,13 @@ eye_ref_l = ref.child('eye/left')
 pupil_ref_l = ref.child('pupil/left')
 eye_ref_r = ref.child('eye/right')
 pupil_ref_r = ref.child('pupil/right')
-focus_ref = ref.child()
+focus_ref = ref.child('focus')
 
 firebase = pyrebase.initialize_app(config)
 
 storage = firebase.storage()
 
-storage.child("images/new.mp4").download("video.mp4")
+storage.child("images/VID_20200221_170532.mp4.mp4").download("video.mp4")
 
 #losses = loss.losses()
 gaze = GazeTracking()
@@ -83,12 +84,10 @@ def mean(l):
 	return int(sum/len(l))
 
 def helper(frames = 10):
-    print(1)
     cap = cv2.VideoCapture("video.mp4")
     j = 0
     while(cap.isOpened()):
         # We get a new frame from the webcam
-        print(2)
         i = 0
         ret, frame = cap.read()
         # print(ret, "\n")
@@ -97,7 +96,6 @@ def helper(frames = 10):
         if(ret == True and j%frames == 0):
 
         	# We send this frame to GazeTracking to analyze it
-        	print(0)
         	gaze.refresh(frame)
 
         	frame = gaze.annotated_frame()
@@ -114,7 +112,7 @@ def helper(frames = 10):
 
         # cv2.putText(frame, text, (90, 60), cv2.FONT_HERSHEY_DUPLEX, 1.6, (0, 255, 0), 2)
 
-        	try:
+        	if(1):
                 	#print(3)
                 	left_pupil = gaze.pupil_left_coords()
                 	right_pupil = gaze.pupil_right_coords()
@@ -128,24 +126,22 @@ def helper(frames = 10):
         	#iris_loss = tuple(losses.iris_error(tuple(x_cords[0], y_cords[0])), losses.iris_error(tuple(x_cords[1], y_cords[1]), 0))
             #print(str(pupil_loss), "\t", str(iris_loss))
 
-                	print(4)
-
-                	left_l = loss.net_loss(left_pupil, tuple(x_cords[0], y_cords[0]))
-                	right_l = loss.net_loss(right_pupil, tuple(x_cords[1], y_cords[1]), left = 0)
+                	left_l = loss.net_loss(left_pupil, tuple((x_cords[0], y_cords[0])), A = 0, B = 2)
+                	right_l = loss.net_loss(right_pupil, tuple((x_cords[1], y_cords[1])), left = 0, A = 0, B = 2)
 
                 	#print(5)
 
                 	print(str(left_pupil), "\t", str(right_pupil), "\t" ,str(x_cords), "\t", str(y_cords))
                 	print("\n", str((left_l+right_l)/2))
 
-        	except:
-            		print(6)
+        	else:
+            		print(1)
             		continue
 
         	eye_ref_l.push({'x':int(left_pupil[0]), 'y':int(left_pupil[1])})
         	eye_ref_r.push({'x':int(right_pupil[0]), 'y':int(right_pupil[1])})
-        	pupil_ref_l.push({'x':str(x_cords[0]), 'y':str(x_cords[1])})
-        	pupil_ref_r.push({'x':str(y_cords[0]), 'y':str(y_cords[1])})
+        	pupil_ref_l.push({'x':str(x_cords[0]), 'y':str(y_cords[0])})
+        	pupil_ref_r.push({'x':str(x_cords[1]), 'y':str(y_cords[1])})
         	focus_ref.push({'focus':str(1-(left_l+right_l)/2)})
 
         j += 1
@@ -169,7 +165,5 @@ def helper(frames = 10):
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-
-        
-print(00)
+	
 helper(10)
