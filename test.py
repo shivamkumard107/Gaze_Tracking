@@ -8,7 +8,7 @@ from firebase_admin import db
 #from gaze_tracking import loss
 
 config = {
-    "apiKey": "AIzaSyB1OyBIvLggIAGWoCDjQK4PId9WJfXnREE",
+    "apiKey" : "AIzaSyB1OyBIvLggIAGWoCDjQK4PId9WJfXnREE",
     "authDomain": "mcandlefocus.firebaseapp.com",
     "databaseURL": "https://mcandlefocus.firebaseio.com",
     "projectId": "mcandlefocus",
@@ -18,54 +18,43 @@ config = {
     "measurementId": "G-H6DWEDR9Z7"
 }
 
-# Fetch the service account key JSON file contents
-cred = credentials.Certificate('firebase-adminsdk.json')
-# Initialize the app with a service account, granting admin privileges
 
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://mcandlefocus.firebaseio.com/'
-})
 
 ref = db.reference('/coordinates')
 
-
-def clearDB():
-    ref.set({
-        'eye':
-            {
-                'left': {
-                    'x': {},
-                    'y': {}
-                },
-                'right': {
-                    'x': {},
-                    'y': {}
-                }
-            },
-        'pupil':
-            {
-                'left': {
-                    'x': {},
-                    'y': {}
-                },
-                'right': {
-                    'x': {},
-                    'y': {}
-                }
-            }
-    })
-
+ref.set({
+    'eye':
+        {
+         'left':{
+                 'x': {},
+                 'y': {}    
+},
+         'right':{
+                 'x': {},
+                 'y': {}
+}
+         },
+    'pupil':
+        {
+             'left':{
+                 'x': {},
+                 'y': {} 
+},
+             'right':{
+                 'x': {},
+                 'y': {} 
+}
+         }
+})
 
 eye_ref_l = ref.child('eye/left')
 pupil_ref_l = ref.child('pupil/left')
 eye_ref_r = ref.child('eye/right')
 pupil_ref_r = ref.child('pupil/right')
 
-firebase = pyrebase.initialize_app(config)
+# firebase = pyrebase.initialize_app(config)
 
-storage = firebase.storage()
 
-storage.child("images/new.mp4").download("video.mp4")
 
 #losses = loss.losses()
 gaze = GazeTracking()
@@ -75,28 +64,24 @@ gaze = GazeTracking()
 list_x = []
 list_y = []
 
-
 def mean(l):
-    sum = 0
-    for i in l:
-        sum += i
-    return int(sum/len(l))
+	sum = 0
+	for i in l:
+		sum += i
+	return int(sum/len(l))
 
-
-def helper(frames=10):
-    print("ML start")
-    clearDB()
-    cap = cv2.VideoCapture("video.mp4")
+def helper(frames, url):
+    cap = cv2.VideoCapture(url)
     j = 0
+    print("ML starts")
     while(cap.isOpened()):
         # We get a new frame from the webcam
         i = 0
-
         ret, frame = cap.read()
         if(ret):
             frame = imutils.rotate(frame, 90)
             # _, frame = webcam.read()
-            if(j % frames == 0):
+            if(j%frames == 0):
 
                 # We send this frame to GazeTracking to analyze it
                 gaze.refresh(frame)
@@ -105,22 +90,22 @@ def helper(frames=10):
                 text = ""
 
                 if gaze.is_blinking():
-                    text = "Blinking"
+                        text = "Blinking"
                 elif gaze.is_right():
-                    text = "Looking right"
+                        text = "Looking right"
                 elif gaze.is_left():
-                    text = "Looking left"
+                        text = "Looking left"
                 elif gaze.is_center():
-                    text = "Looking center"
+                        text = "Looking center"
 
             # cv2.putText(frame, text, (90, 60), cv2.FONT_HERSHEY_DUPLEX, 1.6, (0, 255, 0), 2)
 
                 try:
-                    left_pupil = gaze.pupil_left_coords()
-                    right_pupil = gaze.pupil_right_coords()
-                    x_cords = gaze.x_cords()
-                    y_cords = gaze.y_cords()
-
+                        left_pupil = gaze.pupil_left_coords()
+                        right_pupil = gaze.pupil_right_coords()
+                        x_cords = gaze.x_cords()
+                        y_cords = gaze.y_cords()
+            
                 # cv2.putText(frame, "Left pupil:  " + str(left_pupil), (90, 130), cv2.FONT_HERSHEY_DUPLEX, 0.9, (0, 255, 0), 1)
                 # cv2.putText(frame, "Right pupil: " + str(right_pupil), (90, 165), cv2.FONT_HERSHEY_DUPLEX, 0.9, (0, 255, 0), 1)
 
@@ -128,22 +113,18 @@ def helper(frames=10):
                 #iris_loss = tuple(losses.iris_error(tuple(x_cords[0], y_cords[0])), losses.iris_error(tuple(x_cords[1], y_cords[1]), 0))
                 #print(str(pupil_loss), "\t", str(iris_loss))
 
-                    print(str(left_pupil), "\t", str(right_pupil),
-                          "\t", str(x_cords), "\t", str(y_cords))
+                
+                        print(str(left_pupil), "\t", str(right_pupil), "\t" ,str(x_cords), "\t", str(y_cords))
 
                 except:
-                    continue
+                        continue
 
-                eye_ref_l.push(
-                    {'x': int(left_pupil[0]), 'y': int(left_pupil[1])})
-                eye_ref_r.push(
-                    {'x': int(right_pupil[0]), 'y': int(right_pupil[1])})
-                pupil_ref_l.push({'x': int(x_cords[0]), 'y': int(x_cords[1])})
-                pupil_ref_r.push({'x': int(y_cords[0]), 'y': int(y_cords[1])})
-
+                eye_ref_l.push({'x':int(left_pupil[0]), 'y':int(left_pupil[1])})
+                eye_ref_r.push({'x':int(right_pupil[0]), 'y':int(right_pupil[1])})
+                pupil_ref_l.push({'x':str(x_cords[0]), 'y':str(x_cords[1])})
+                pupil_ref_r.push({'x':str(y_cords[0]), 'y':str(y_cords[1])})
         else:
             break
-
         j += 1
 
         """
@@ -160,7 +141,10 @@ def helper(frames=10):
             pass
         """
 
+
         # cv2.imshow("Demo", frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+
+        
