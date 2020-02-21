@@ -41,17 +41,17 @@ def post_something():
     storage = firebase.storage()
     storage.child("images/new.mp4").download("video.mp4")
     from test import helper
-    helper(10, "video.mp4")
+    focussed = helper(10, "video.mp4")
+    print(focussed)
     # You can add the test cases you made in the previous function, but in our case here you are just testing the POST functionality
     if param:
         return jsonify({
-            "Message": "Welcome " + param + " to our awesome platform!!",
+            "Message": focussed,
             # Add this option to distinct the POST request
-            "METHOD" : "POST"
         })
     else:
         return jsonify({
-            "ERROR": "no name found, please send a name."
+            "Message": "No focus found"
         })
 
     

@@ -5,10 +5,13 @@ import imutils
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
+from loss import losses
 #from gaze_tracking import loss
 
+loss = losses()
+
 config = {
-    "apiKey" : "AIzaSyB1OyBIvLggIAGWoCDjQK4PId9WJfXnREE",
+    "apiKey": "AIzaSyB1OyBIvLggIAGWoCDjQK4PId9WJfXnREE",
     "authDomain": "mcandlefocus.firebaseapp.com",
     "databaseURL": "https://mcandlefocus.firebaseio.com",
     "projectId": "mcandlefocus",
@@ -19,41 +22,40 @@ config = {
 }
 
 
-
 ref = db.reference('/coordinates')
 
 ref.set({
     'eye':
         {
-         'left':{
-                 'x': {},
-                 'y': {}    
-},
-         'right':{
-                 'x': {},
-                 'y': {}
-}
-         },
+            'left': {
+                'x': {},
+                'y': {}
+            },
+            'right': {
+                'x': {},
+                'y': {}
+            }
+        },
     'pupil':
         {
-             'left':{
-                 'x': {},
-                 'y': {} 
-},
-             'right':{
-                 'x': {},
-                 'y': {} 
-}
-         }
+            'left': {
+                'x': {},
+                'y': {}
+            },
+            'right': {
+                'x': {},
+                'y': {}
+            }
+        }
 })
 
 eye_ref_l = ref.child('eye/left')
 pupil_ref_l = ref.child('pupil/left')
 eye_ref_r = ref.child('eye/right')
 pupil_ref_r = ref.child('pupil/right')
+focus_ref = ref.child('focussed/')
 
 # firebase = pyrebase.initialize_app(config)
-
 
 
 #losses = loss.losses()
@@ -64,14 +66,17 @@ gaze = GazeTracking()
 list_x = []
 list_y = []
 
+
 def mean(l):
-	sum = 0
-	for i in l:
-		sum += i
-	return int(sum/len(l))
+    sum = 0
+    for i in l:
+        sum += i
+    return int(sum/len(l))
+
 
 def helper(frames, url):
     cap = cv2.VideoCapture(url)
+    focussed = []
     j = 0
     print("ML starts")
     while(cap.isOpened()):
@@ -81,7 +86,7 @@ def helper(frames, url):
         if(ret):
             frame = imutils.rotate(frame, 90)
             # _, frame = webcam.read()
-            if(j%frames == 0):
+            if(j % frames == 0):
 
                 # We send this frame to GazeTracking to analyze it
                 gaze.refresh(frame)
@@ -90,39 +95,47 @@ def helper(frames, url):
                 text = ""
 
                 if gaze.is_blinking():
-                        text = "Blinking"
+                    text = "Blinking"
                 elif gaze.is_right():
-                        text = "Looking right"
+                    text = "Looking right"
                 elif gaze.is_left():
-                        text = "Looking left"
+                    text = "Looking left"
                 elif gaze.is_center():
-                        text = "Looking center"
+                    text = "Looking center"
 
             # cv2.putText(frame, text, (90, 60), cv2.FONT_HERSHEY_DUPLEX, 1.6, (0, 255, 0), 2)
 
                 try:
-                        left_pupil = gaze.pupil_left_coords()
-                        right_pupil = gaze.pupil_right_coords()
-                        x_cords = gaze.x_cords()
-                        y_cords = gaze.y_cords()
-            
-                # cv2.putText(frame, "Left pupil:  " + str(left_pupil), (90, 130), cv2.FONT_HERSHEY_DUPLEX, 0.9, (0, 255, 0), 1)
-                # cv2.putText(frame, "Right pupil: " + str(right_pupil), (90, 165), cv2.FONT_HERSHEY_DUPLEX, 0.9, (0, 255, 0), 1)
+                    left_pupil = gaze.pupil_left_coords()
+                    right_pupil = gaze.pupil_right_coords()
+                    x_cords = gaze.x_cords()
+                    y_cords = gaze.y_cords()
 
-                #pupil_loss = tuple(losses.pupil_error(left_pupil), losses.pupil_error(right_pupil, 0))
-                #iris_loss = tuple(losses.iris_error(tuple(x_cords[0], y_cords[0])), losses.iris_error(tuple(x_cords[1], y_cords[1]), 0))
-                #print(str(pupil_loss), "\t", str(iris_loss))
+                    print(str(left_pupil), "\t", str(right_pupil),
+                            "\t", str(x_cords), "\t", str(y_cords))
 
-                
-                        print(str(left_pupil), "\t", str(right_pupil), "\t" ,str(x_cords), "\t", str(y_cords))
+                    # eye_ref_l.push(
+                    #     {'x': int(left_pupil[0]), 'y': int(left_pupil[1])})
+                    # eye_ref_r.push(
+                    #     {'x': int(right_pupil[0]), 'y': int(right_pupil[1])})
+                    # pupil_ref_l.push(
+                    #     {'x': str(x_cords[0]), 'y': str(x_cords[1])})
+                    # pupil_ref_r.push(
+                    #     {'x': str(y_cords[0]), 'y': str(y_cords[1])})
 
+                    print(1)
+
+                    # loss calculation and update in db
+                    left_l = loss.net_loss(left_pupil, x_cords)
+                    right_l = loss.net_loss(right_pupil, y_cords)
+                    print("left: " + str(left_l) + " right: " + str(right_l))
+                    print("\n", str((left_l+right_l)/2.0))
+                    focussed.append(1-(left_l+right_l)/2.0)
+                    # focus_ref.push({'focus': str(1-(left_l+right_l)/2)})
                 except:
-                        continue
+                    print("Exception Caught")
+                    continue
 
-                eye_ref_l.push({'x':int(left_pupil[0]), 'y':int(left_pupil[1])})
-                eye_ref_r.push({'x':int(right_pupil[0]), 'y':int(right_pupil[1])})
-                pupil_ref_l.push({'x':str(x_cords[0]), 'y':str(x_cords[1])})
-                pupil_ref_r.push({'x':str(y_cords[0]), 'y':str(y_cords[1])})
         else:
             break
         j += 1
@@ -141,10 +154,8 @@ def helper(frames, url):
             pass
         """
 
-
         # cv2.imshow("Demo", frame)
-
+        
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-
-        
+    return focussed
