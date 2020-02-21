@@ -75,6 +75,7 @@ def mean(l):
 
 
 def helper(frames, url):
+    # print("url: " + url)
     cap = cv2.VideoCapture(url)
     focussed = []
     j = 0

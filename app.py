@@ -36,23 +36,21 @@ def check():
 
 @app.route('/post', methods=['POST'])
 def post_something():
-    param = request.form.get('name')
-    print(param)
-    
-    storage = firebase.storage()
-    storage.child("images/new.mp4").download("video.mp4")
+    param = request.get_json()
+    url = param["url"]
+    print("url: "+ str(url))
     from test import helper
-    focussed = helper(10, "video.mp4")
-    print(focussed)
+    focussed = helper(10, str(url))
+    print("focus:" + str(statistics.mean(focussed)))
     # You can add the test cases you made in the previous function, but in our case here you are just testing the POST functionality
     if param:
         return jsonify({
-            "Message": statistics.mean(focussed)
+            "score": statistics.mean(focussed)
             # Add this option to distinct the POST request
         })
     else:
         return jsonify({
-            "Message": -1
+            "score": -1
         })
 
     
