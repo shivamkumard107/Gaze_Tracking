@@ -6,6 +6,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 import pyrebase
+import statistics
 
 app = Flask(__name__)
 config = {
@@ -46,12 +47,12 @@ def post_something():
     # You can add the test cases you made in the previous function, but in our case here you are just testing the POST functionality
     if param:
         return jsonify({
-            "Message": focussed,
+            "Message": statistics.mean(focussed)
             # Add this option to distinct the POST request
         })
     else:
         return jsonify({
-            "Message": "No focus found"
+            "Message": -1
         })
 
     
