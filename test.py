@@ -159,4 +159,5 @@ def helper(frames, url):
         
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+        print(focussed)
     return focussed

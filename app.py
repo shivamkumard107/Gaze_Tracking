@@ -18,7 +18,7 @@ config = {
     "messagingSenderId": "140073311865",
     "appId": "1:140073311865:web:12426f96cae1f3c88a7ea8",
     "measurementId": "G-H6DWEDR9Z7"
-};
+}
 
 # Fetch the service account key JSON file contents
 cred = credentials.Certificate('firebase-adminsdk.json')
