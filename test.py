@@ -1,69 +1,17 @@
 import cv2
 from gaze_tracking import GazeTracking
-import pyrebase
 import imutils
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import db
 from loss import losses
+import numpy as np
 import math
 
 # from gaze_tracking import loss
 
 loss = losses()
 
-config = {
-    "apiKey": "AIzaSyB1OyBIvLggIAGWoCDjQK4PId9WJfXnREE",
-    "authDomain": "mcandlefocus.firebaseapp.com",
-    "databaseURL": "https://mcandlefocus.firebaseio.com",
-    "projectId": "mcandlefocus",
-    "storageBucket": "mcandlefocus.appspot.com",
-    "messagingSenderId": "140073311865",
-    "appId": "1:140073311865:web:12426f96cae1f3c88a7ea8",
-    "measurementId": "G-H6DWEDR9Z7"
-}
-
-
-ref = db.reference('/coordinates')
-
-ref.set({
-    'eye':
-        {
-            'left': {
-                'x': {},
-                'y': {}
-            },
-            'right': {
-                'x': {},
-                'y': {}
-            }
-        },
-    'pupil':
-        {
-            'left': {
-                'x': {},
-                'y': {}
-            },
-            'right': {
-                'x': {},
-                'y': {}
-            }
-        }
-})
-
-eye_ref_l = ref.child('eye/left')
-pupil_ref_l = ref.child('pupil/left')
-eye_ref_r = ref.child('eye/right')
-pupil_ref_r = ref.child('pupil/right')
-focus_ref = ref.child('focussed/')
-
-# firebase = pyrebase.initialize_app(config)
-
-
 # losses = loss.losses()
 gaze = GazeTracking()
 
-# webcam = cv2.VideoCapture(0)
 
 list_x = []
 list_y = []
@@ -73,7 +21,7 @@ def mean(l):
     sum = 0
     for i in l:
         sum += i
-    return int(sum/len(l))
+    return (sum/len(l))
 
 
 def helper(frames, url):
@@ -133,12 +81,7 @@ def helper(frames, url):
                 focussed.append(focus)
             else:
                 continue
-            # upload to firebase database
-            # eye_ref_l.push({'x':int(left_pupil[0]), 'y':int(left_pupil[1])})
-            # eye_ref_r.push({'x':int(right_pupil[0]), 'y':int(right_pupil[1])})
-            # pupil_ref_l.push({'x':str(x_cords[0]), 'y':str(y_cords[0])})
-            # pupil_ref_r.push({'x':str(x_cords[1]), 'y':str(y_cords[1])})
-            # focus_ref.push({'focus':str(1-(left_l+right_l)/2)})
+            
         else:
             pass
 
@@ -149,13 +92,6 @@ def helper(frames, url):
         if cv2.waitKey(1) & 0xFF == ord('q') or ret == False:
             break
         # calculating the root mean square of all focus values
-        mean_focus = 0
-        for i in focussed:
-            mean_focus = mean_focus + i**2
-        if(len(focussed) == 0):
-            root_mean_focus = 0
-        else:
-            root_mean_focus = mean_focus/len(focussed)
-        root_mean_focus = (math.sqrt(mean_focus))
         
-    return root_mean_focus
+    focussed = np.array(focussed)
+    return np.sqrt((focussed**2).mean())

@@ -2,32 +2,9 @@ from flask import Flask, request, jsonify
 import flask
 import werkzeug
 import time
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import db
-import pyrebase
 
 
 app = Flask(__name__)
-config = {
-    "apiKey" : "AIzaSyB1OyBIvLggIAGWoCDjQK4PId9WJfXnREE",
-    "authDomain": "mcandlefocus.firebaseapp.com",
-    "databaseURL": "https://mcandlefocus.firebaseio.com",
-    "projectId": "mcandlefocus",
-    "storageBucket": "mcandlefocus.appspot.com",
-    "messagingSenderId": "140073311865",
-    "appId": "1:140073311865:web:12426f96cae1f3c88a7ea8",
-    "measurementId": "G-H6DWEDR9Z7"
-}
-
-# Fetch the service account key JSON file contents
-cred = credentials.Certificate('firebase-adminsdk.json')
-# Initialize the app with a service account, granting admin privileges
-
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://mcandlefocus.firebaseio.com/'
-})
-firebase = pyrebase.initialize_app(config)
 
 
 @app.route('/', methods=['GET'])
