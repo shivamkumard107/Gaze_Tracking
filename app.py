@@ -6,7 +6,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
 import pyrebase
-import statistics
+
 
 app = Flask(__name__)
 config = {
@@ -40,12 +40,12 @@ def post_something():
     url = param["url"]
     print("url: "+ str(url))
     from test import helper
-    focussed = helper(10, str(url))
-    print("focus:" + str(statistics.mean(focussed)))
+    focus = helper(10, str(url))
+    print("focus:", focus)
     # You can add the test cases you made in the previous function, but in our case here you are just testing the POST functionality
     if param:
         return jsonify({
-            "score": statistics.mean(focussed)
+            "score": focus
             # Add this option to distinct the POST request
         })
     else:
