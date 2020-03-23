@@ -93,7 +93,7 @@ def helper(frames, url):
             break
     
     for i in range(len(focused)):
-        if(focused[i] > 0.75):
+        if(focused[i] > 0.90):
             focused[i] = 1.00
         else:
             focused[i] = 0
