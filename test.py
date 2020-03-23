@@ -27,7 +27,7 @@ def mean(l):
 def helper(frames, url):
     # print("url: " + url)
     cap = cv2.VideoCapture(url)
-    focussed = []
+    focused = []
     j = 0
     print("ML starts")
     while(cap.isOpened()):
@@ -78,7 +78,7 @@ def helper(frames, url):
                     right_pupil, tuple((x_cords[1], y_cords[1])))
                 focus = 1-(left_l+right_l)/2
                 print(str(focus), "\n")
-                focussed.append(focus)
+                focused.append(focus)
             else:
                 continue
             
@@ -91,7 +91,13 @@ def helper(frames, url):
 
         if cv2.waitKey(1) & 0xFF == ord('q') or ret == False:
             break
-        # calculating the root mean square of all focus values
-        
-    focussed = np.array(focussed)
-    return np.sqrt((focussed**2).mean())
+    
+    for i in range(len(focused)):
+        if(focused[i] > 0.75):
+            focused[i] = 1.00
+        else:
+            focused[i] = 0
+        print(focused[i])
+    # calculating the root mean square of all focus values  
+    focused = np.array(focused)
+    return np.sqrt((focused**2).mean())
