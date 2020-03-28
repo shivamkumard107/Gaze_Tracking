@@ -23,6 +23,37 @@ def mean(l):
         sum += i
     return (sum/len(l))
 
+def lockCheck(filename):
+    img = cv2.imread(filename)
+    # We send this frame to GazeTracking to analyze it
+    gaze.refresh(img)
+
+    img = gaze.annotated_frame()
+
+    left_pupil = gaze.pupil_left_coords()
+    right_pupil = gaze.pupil_right_coords()
+    x_cords = gaze.x_cords()
+    y_cords = gaze.y_cords()
+    if(left_pupil == None):
+        left_pupil = (0, 0)
+    if(right_pupil == None):
+        right_pupil = (0, 0)
+    if(x_cords == None):
+        x_cords = (0, 0)
+    if(y_cords == None):
+        y_cords = (0, 0)
+
+    print(str(left_pupil), "\t", str(right_pupil),
+            "\t", str(x_cords), "\t", str(y_cords), "\n")
+
+    left_l = loss.net_loss(
+        left_pupil, tuple((x_cords[0], y_cords[0])))
+    right_l = loss.net_loss(
+        right_pupil, tuple((x_cords[1], y_cords[1])))
+    focus = 1-(left_l+right_l)/2
+    print(str(focus), "\n")
+    return focus
+
 
 def helper(frames, url):
     # print("url: " + url)
@@ -34,6 +65,8 @@ def helper(frames, url):
         # We get a new frame from the webcam
         i = 0
         ret, frame = cap.read()
+        # print("frame", type(frame))
+        # print("ret", type(ret))
         if(ret == True and j % frames == 0):
             frame = imutils.rotate(frame, 90)
             # _, frame = webcam.read()
