@@ -25,24 +25,26 @@ def mean(l):
 
 def lockCheck(filename):
     img = cv2.imread(filename)
+    
+    #checking if he's facing the camera using haarcascades
+    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+    if(len(faces)==0):
+        # focused.append(0)
+        print('face not detected')
+        return 0
+
     # We send this frame to GazeTracking to analyze it
     gaze.refresh(img)
-
     img = gaze.annotated_frame()
-
     left_pupil = gaze.pupil_left_coords()
     right_pupil = gaze.pupil_right_coords()
     x_cords = gaze.x_cords()
     y_cords = gaze.y_cords()
-    if(left_pupil == None):
-        left_pupil = (0, 0)
-    if(right_pupil == None):
-        right_pupil = (0, 0)
-    if(x_cords == None):
-        x_cords = (0, 0)
-    if(y_cords == None):
-        y_cords = (0, 0)
-
+    if(left_pupil == None or right_pupil==None or x_cords==None or y_cords==None):
+        print('Adjust your face, pupil/eyes not detected')
+        return 0
     print(str(left_pupil), "\t", str(right_pupil),
             "\t", str(x_cords), "\t", str(y_cords), "\n")
 
